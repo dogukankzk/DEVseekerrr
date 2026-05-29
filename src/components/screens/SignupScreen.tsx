@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ActivityIndicator, ScrollView, KeyboardAvoidingView, Platform,
+  ActivityIndicator, ScrollView, KeyboardAvoidingView, Platform, SafeAreaView,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../navigation/types';
@@ -35,15 +35,15 @@ const LEGAL_CONTENT = {
 type ViewType = 'inscription' | 'terms' | 'privacy';
 
 export default function SignupScreen({ navigation }: Props) {
-  const [view, setView]                   = useState<ViewType>('inscription');
-  const [name, setName]                   = useState('');
-  const [email, setEmail]                 = useState('');
-  const [password, setPassword]           = useState('');
+  const [view, setView]                       = useState<ViewType>('inscription');
+  const [name, setName]                       = useState('');
+  const [email, setEmail]                     = useState('');
+  const [password, setPassword]               = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [loading, setLoading]             = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const [error, setError]                 = useState('');
+  const [acceptedTerms, setAcceptedTerms]     = useState(false);
+  const [loading, setLoading]                 = useState(false);
+  const [googleLoading, setGoogleLoading]     = useState(false);
+  const [error, setError]                     = useState('');
 
   function switchView(v: ViewType) { setError(''); setView(v); }
 
@@ -53,33 +53,27 @@ export default function SignupScreen({ navigation }: Props) {
     if (password !== confirmPassword) { setError('Les mots de passe ne correspondent pas'); return; }
     if (!acceptedTerms) { setError("Veuillez accepter les conditions d'utilisation"); return; }
     setLoading(true);
-    // TODO: appel API register
-    await new Promise((r) => setTimeout(r, 800));
+    await new Promise((r) => setTimeout(r, 800)); // TODO: API
     setLoading(false);
-    // navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
   }
 
   async function handleGoogle() {
-    setError('');
-    setGoogleLoading(true);
-    // TODO: Google OAuth
-    await new Promise((r) => setTimeout(r, 800));
+    setError(''); setGoogleLoading(true);
+    await new Promise((r) => setTimeout(r, 800)); // TODO: Google OAuth
     setGoogleLoading(false);
   }
 
   return (
-    <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-      <View style={styles.card}>
+    <SafeAreaView style={styles.safe}>
+      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
 
         {/* ── INSCRIPTION ── */}
         {view === 'inscription' && (
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-            <View style={styles.logoContainer}>
-              <View style={styles.logoBox}>
-                <Text style={styles.logoText}>DS</Text>
-              </View>
+            <View style={styles.header}>
+              <Text style={styles.appName}>DevSeekr</Text>
               <Text style={styles.title}>Créer un compte</Text>
-              <Text style={styles.subtitle}>Rejoignez DevSeekr dès maintenant</Text>
+              <Text style={styles.subtitle}>Rejoignez des milliers de devs 🧑‍💻</Text>
             </View>
 
             {!!error && <View style={styles.errorBox}><Text style={styles.errorText}>{error}</Text></View>}
@@ -150,7 +144,7 @@ export default function SignupScreen({ navigation }: Props) {
             </TouchableOpacity>
 
             <View style={styles.footer}>
-              <Text style={styles.footerText}>Vous avez déjà un compte ? </Text>
+              <Text style={styles.footerText}>Déjà un compte ? </Text>
               <TouchableOpacity onPress={() => navigation.navigate('Login')}>
                 <Text style={styles.link}>Se connecter</Text>
               </TouchableOpacity>
@@ -158,9 +152,9 @@ export default function SignupScreen({ navigation }: Props) {
           </ScrollView>
         )}
 
-        {/* ── LEGAL (terms / privacy) ── */}
+        {/* ── LEGAL ── */}
         {(view === 'terms' || view === 'privacy') && (
-          <View style={{ flex: 1 }}>
+          <View style={styles.flex}>
             <View style={styles.legalHeader}>
               <TouchableOpacity onPress={() => switchView('inscription')} style={styles.legalBackBtn}>
                 <Text style={styles.legalBackArrow}>←</Text>
@@ -179,51 +173,59 @@ export default function SignupScreen({ navigation }: Props) {
           </View>
         )}
 
-      </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  screen:         { flex: 1, backgroundColor: '#f3f4f6', alignItems: 'center', justifyContent: 'center' },
-  card:           { width: 375, minHeight: 600, backgroundColor: '#fff', borderRadius: 24, elevation: 10, overflow: 'hidden' },
-  content:        { paddingHorizontal: 24, paddingTop: 16, paddingBottom: 32 },
-  logoContainer:  { alignItems: 'center', marginBottom: 24 },
-  logoBox:        { width: 64, height: 64, borderRadius: 20, backgroundColor: '#ede9fe', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
-  logoText:       { fontSize: 22, fontWeight: '800', color: '#7c3aed' },
-  title:          { fontSize: 24, fontWeight: '700', color: '#1a1a2e', marginBottom: 4 },
-  subtitle:       { fontSize: 14, color: '#6b7280' },
-  errorBox:       { backgroundColor: 'rgba(212,24,61,0.08)', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, marginBottom: 16 },
+  safe:           { flex: 1, backgroundColor: '#ffffff' },
+  flex:           { flex: 1 },
+  content:        { flexGrow: 1, paddingHorizontal: 24, paddingTop: 48, paddingBottom: 40 },
+
+  header:         { marginBottom: 36 },
+  appName:        { fontSize: 15, fontWeight: '700', color: '#7c3aed', marginBottom: 16, letterSpacing: 0.5 },
+  title:          { fontSize: 28, fontWeight: 'bold', color: '#1f2937', marginBottom: 8 },
+  subtitle:       { fontSize: 15, color: '#6b7280', lineHeight: 22 },
+
+  errorBox:       { backgroundColor: 'rgba(212,24,61,0.08)', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, marginBottom: 20 },
   errorText:      { fontSize: 13, color: '#d4183d' },
-  fields:         { gap: 14, marginBottom: 20 },
-  label:          { fontSize: 12, fontWeight: '500', color: '#1a1a2e', marginBottom: 6 },
-  inputRow:       { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#f9fafb', borderWidth: 1, borderColor: '#e5e7eb', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12 },
+
+  fields:         { gap: 16, marginBottom: 28 },
+  label:          { fontSize: 13, fontWeight: '600', color: '#374151', marginBottom: 8 },
+  inputRow:       { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#f9fafb', borderWidth: 1.5, borderColor: '#e5e7eb', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 14 },
   inputIcon:      { fontSize: 16 },
-  input:          { flex: 1, fontSize: 14, color: '#1a1a2e', padding: 0 },
-  termsRow:       { flexDirection: 'row', alignItems: 'flex-start', gap: 8, paddingTop: 4 },
-  checkbox:       { width: 18, height: 18, borderRadius: 4, borderWidth: 1, borderColor: '#e5e7eb', backgroundColor: '#f9fafb', alignItems: 'center', justifyContent: 'center', marginTop: 1, flexShrink: 0 },
+  input:          { flex: 1, fontSize: 15, color: '#1f2937', padding: 0 },
+
+  termsRow:       { flexDirection: 'row', alignItems: 'flex-start', gap: 10, paddingTop: 4 },
+  checkbox:       { width: 20, height: 20, borderRadius: 6, borderWidth: 1.5, borderColor: '#d1d5db', backgroundColor: '#f9fafb', alignItems: 'center', justifyContent: 'center', marginTop: 1, flexShrink: 0 },
   checkboxOn:     { backgroundColor: '#7c3aed', borderColor: '#7c3aed' },
-  checkmark:      { color: '#fff', fontSize: 11, fontWeight: '700' },
-  termsText:      { flex: 1, fontSize: 12, color: '#6b7280', lineHeight: 18 },
-  primaryBtn:     { backgroundColor: '#7c3aed', borderRadius: 12, paddingVertical: 14, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
-  disabled:       { opacity: 0.7 },
-  primaryBtnText: { color: '#fff', fontSize: 15, fontWeight: '600' },
-  divider:        { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
+  checkmark:      { color: '#fff', fontSize: 12, fontWeight: '700' },
+  termsText:      { flex: 1, fontSize: 13, color: '#6b7280', lineHeight: 20 },
+
+  primaryBtn:     { backgroundColor: '#7c3aed', borderRadius: 14, paddingVertical: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
+  disabled:       { opacity: 0.6 },
+  primaryBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+
+  divider:        { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 20 },
   dividerLine:    { flex: 1, height: 1, backgroundColor: '#e5e7eb' },
-  dividerText:    { fontSize: 12, color: '#6b7280' },
-  googleBtn:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderWidth: 1, borderColor: '#e5e7eb', borderRadius: 12, paddingVertical: 12, marginBottom: 20, backgroundColor: '#fff' },
-  googleIcon:     { fontSize: 15, fontWeight: '700', color: '#4285F4' },
-  googleBtnText:  { fontSize: 14, fontWeight: '500', color: '#1a1a2e' },
+  dividerText:    { fontSize: 13, color: '#9ca3af' },
+
+  googleBtn:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, borderWidth: 1.5, borderColor: '#e5e7eb', borderRadius: 14, paddingVertical: 14, marginBottom: 36, backgroundColor: '#fff' },
+  googleIcon:     { fontSize: 16, fontWeight: '800', color: '#4285F4' },
+  googleBtnText:  { fontSize: 15, fontWeight: '600', color: '#1f2937' },
+
   footer:         { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
   footerText:     { fontSize: 14, color: '#6b7280' },
-  link:           { fontSize: 12, fontWeight: '600', color: '#7c3aed' },
-  legalHeader:    { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#e5e7eb' },
-  legalBackBtn:   { padding: 6, borderRadius: 8, backgroundColor: '#f9fafb' },
-  legalBackArrow: { fontSize: 18, color: '#1a1a2e' },
-  legalTitle:     { fontSize: 15, fontWeight: '600', color: '#1a1a2e' },
-  legalContent:   { paddingHorizontal: 20, paddingVertical: 20, gap: 20 },
-  legalSection:   { gap: 6 },
-  legalHeading:   { fontSize: 13, fontWeight: '600', color: '#1a1a2e' },
-  legalBody:      { fontSize: 13, color: '#6b7280', lineHeight: 20 },
-  legalDate:      { fontSize: 11, color: '#9ca3af', paddingTop: 8 },
+  link:           { fontSize: 14, fontWeight: '700', color: '#7c3aed' },
+
+  legalHeader:    { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#f3f4f6' },
+  legalBackBtn:   { padding: 8, borderRadius: 10, backgroundColor: '#f9fafb' },
+  legalBackArrow: { fontSize: 18, color: '#1f2937' },
+  legalTitle:     { fontSize: 16, fontWeight: '700', color: '#1f2937' },
+  legalContent:   { paddingHorizontal: 24, paddingVertical: 24, gap: 24 },
+  legalSection:   { gap: 8 },
+  legalHeading:   { fontSize: 14, fontWeight: '700', color: '#1f2937' },
+  legalBody:      { fontSize: 14, color: '#6b7280', lineHeight: 22 },
+  legalDate:      { fontSize: 12, color: '#9ca3af', paddingTop: 8 },
 });
