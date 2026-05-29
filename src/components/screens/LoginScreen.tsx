@@ -4,7 +4,7 @@ import {
   ActivityIndicator, ScrollView, KeyboardAvoidingView, Platform, SafeAreaView,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AuthStackParamList } from '../../navigation/types';
+import { AuthStackParamList, RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -21,18 +21,23 @@ export default function LoginScreen({ navigation }: Props) {
 
   function switchView(v: typeof view) { setError(''); setForgotError(''); setView(v); }
 
+  function goToMain() {
+    navigation.getParent<NativeStackScreenProps<RootStackParamList>['navigation']>()?.navigate('Main');
+  }
+
   async function handleLogin() {
     setError('');
-    if (!email || !password) { setError('Veuillez remplir tous les champs'); return; }
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800)); // TODO: API
+    await new Promise((r) => setTimeout(r, 600)); // TODO: API
     setLoading(false);
+    goToMain();
   }
 
   async function handleGoogle() {
     setError(''); setGoogleLoading(true);
-    await new Promise((r) => setTimeout(r, 800)); // TODO: Google OAuth
+    await new Promise((r) => setTimeout(r, 600)); // TODO: Google OAuth
     setGoogleLoading(false);
+    goToMain();
   }
 
   async function handleForgot() {
@@ -123,6 +128,11 @@ export default function LoginScreen({ navigation }: Props) {
                 <Text style={styles.link}>S'inscrire</Text>
               </TouchableOpacity>
             </View>
+
+            {/* Mode démo */}
+            <TouchableOpacity style={styles.demoBtn} onPress={goToMain} activeOpacity={0.7}>
+              <Text style={styles.demoBtnText}>Continuer sans compte →</Text>
+            </TouchableOpacity>
           </ScrollView>
         )}
 
@@ -228,4 +238,6 @@ const styles = StyleSheet.create({
 
   successCircle:  { width: 72, height: 72, borderRadius: 36, backgroundColor: '#ede9fe', alignItems: 'center', justifyContent: 'center', marginBottom: 24 },
   successIcon:    { fontSize: 32, color: '#7c3aed', fontWeight: '700' },
+  demoBtn:        { alignItems: 'center', marginTop: 20, paddingVertical: 8 },
+  demoBtnText:    { fontSize: 13, color: '#9ca3af', textDecorationLine: 'underline' },
 });
