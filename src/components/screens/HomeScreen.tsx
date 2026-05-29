@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '../../navigation/types';
+import { useFavorites } from '../../context/FavoritesContext';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'HomeScreen'>;
 
@@ -40,6 +41,7 @@ const JOBS = [
 export default function HomeScreen({ navigation }: Props) {
   const [activeFilter, setActiveFilter] = useState(0);
   const [search, setSearch] = useState('');
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const filteredJobs = JOBS.filter((job) => {
     const matchFilter =
@@ -113,8 +115,14 @@ export default function HomeScreen({ navigation }: Props) {
             {/* Titre + like */}
             <View style={styles.cardTop}>
               <Text style={styles.cardTitle} numberOfLines={2}>{job.title}</Text>
-              <TouchableOpacity style={styles.likeBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                <Text style={styles.likeIcon}>👍</Text>
+              <TouchableOpacity
+                style={styles.likeBtn}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                onPress={() => toggleFavorite(job)}
+              >
+                <Text style={[styles.likeIcon, isFavorite(job.id) && styles.likeIconActive]}>
+                  {isFavorite(job.id) ? '❤️' : '🤍'}
+                </Text>
               </TouchableOpacity>
             </View>
 
@@ -185,7 +193,8 @@ const styles = StyleSheet.create({
   cardTop:            { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 },
   cardTitle:          { flex: 1, fontSize: 13, fontWeight: '700', color: '#1f2937', paddingRight: 8 },
   likeBtn:            { padding: 2 },
-  likeIcon:           { fontSize: 14, opacity: 0.4 },
+  likeIcon:           { fontSize: 16 },
+  likeIconActive:     { fontSize: 16 },
   cardCompany:        { fontSize: 11, color: '#6b7280', marginBottom: 8 },
   cardMeta:           { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   locationRow:        { flexDirection: 'row', alignItems: 'center', gap: 3 },
